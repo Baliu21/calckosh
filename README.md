@@ -1,4 +1,4 @@
-# CalcBharat Zero-Brainer v3
+# CalcKosh Zero-Brainer v3
 
 Static, mobile-first calculator website. Engineering tools are intentionally NOT included.
 
@@ -13,7 +13,7 @@ Static, mobile-first calculator website. Engineering tools are intentionally NOT
 
 ## Test in Termux
 ```bash
-cd calcbharat-zero-brainer-v3
+cd calckosh-zero-brainer-v3
 node test_calculators.js
 python -m http.server 8080
 ```
@@ -24,7 +24,7 @@ Open http://127.0.0.1:8080
 2. Create a GitHub repository.
 3. Deploy with:
 ```bash
-./deploy_github_pages.sh https://github.com/USER/calcbharat.git https://USER.github.io/calcbharat
+./deploy_github_pages.sh https://github.com/USER/calckosh.git https://USER.github.io/calckosh
 ```
 4. Enable GitHub Pages from `main` / root in repository Settings > Pages.
 5. When a custom domain is purchased, rerun `configure_site.py` on a fresh copy or replace the old public URL in HTML/sitemap/robots.

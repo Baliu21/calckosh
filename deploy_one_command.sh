@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -euo pipefail
 
-REPO="${1:-calcbharat}"
+REPO="${1:-calckosh}"
 
 command -v gh >/dev/null 2>&1 || { echo "GitHub CLI missing. Install with: pkg install gh git -y"; exit 2; }
 command -v git >/dev/null 2>&1 || { echo "git missing. Install with: pkg install git -y"; exit 2; }
@@ -21,7 +21,7 @@ if [ ! -d .git ]; then git init; fi
 git config user.name "${OWNER}"
 git config user.email "${OWNER}@users.noreply.github.com"
 git add .
-if ! git diff --cached --quiet; then git commit -m "Deploy CalcBharat v3"; fi
+if ! git diff --cached --quiet; then git commit -m "Deploy CalcKosh v3"; fi
 git branch -M main
 
 if gh repo view "$OWNER/$REPO" >/dev/null 2>&1; then
