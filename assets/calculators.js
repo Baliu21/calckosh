@@ -1,0 +1,22 @@
+
+(function(global){
+ "use strict";
+ const valid=(...xs)=>xs.every(x=>Number.isFinite(Number(x)));
+ function emi(P, annual, months){P=+P;annual=+annual;months=+months;if(!valid(P,annual,months)||P<=0||annual<0||months<=0)return null;const r=annual/1200;if(r===0)return P/months;const x=(1+r)**months;return P*r*x/(x-1)}
+ function amortize(P,annual,payment,max=1200){P=+P;annual=+annual;payment=+payment;if(!valid(P,annual,payment)||P<=0||annual<0||payment<=0)return null;const r=annual/1200;if(r>0&&payment<=P*r)return{possible:false};let b=P,m=0,i=0;while(b>.01&&m<max){const it=b*r;const pay=Math.min(payment,b+it);b=Math.max(0,b+it-pay);i+=it;m++}return{possible:b<=.01,months:m,interest:i,total:P+i,balance:b}}
+ function prepayment(P,annual,months,after,amount){P=+P;annual=+annual;months=+months;after=+after;amount=+amount;if(!valid(P,annual,months,after,amount)||P<=0||annual<0||months<=0||after<0||after>=months||amount<0)return null;const pay=emi(P,annual,months),r=annual/1200;let b=P,paidI=0;for(let m=1;m<=after&&b>.01;m++){const it=b*r;paidI+=it;b=Math.max(0,b+it-Math.min(pay,b+it))}const before=b;b=Math.max(0,b-amount);let post=0,postI=0;while(b>.01&&post<1200){const it=b*r;postI+=it;b=Math.max(0,b+it-Math.min(pay,b+it));post++}const baseI=pay*months-P;const newI=paidI+postI;return{emi:pay,outstandingBefore:before,newTenureMonths:after+post,monthsSaved:Math.max(0,months-after-post),baselineInterest:baseI,newInterest:newI,interestSaved:Math.max(0,baseI-newI)}}
+ function creditMinimum(balance,monthly,minPct,minFloor,max=600){balance=+balance;monthly=+monthly;minPct=+minPct;minFloor=+minFloor;if(!valid(balance,monthly,minPct,minFloor)||balance<=0||monthly<0||minPct<=0||minFloor<0)return null;const r=monthly/100;let b=balance,m=0,paid=0,interest=0;while(b>.01&&m<max){m++;const due=Math.min(b,Math.max(b*minPct/100,minFloor));const rem=Math.max(0,b-due);const it=rem*r;const close=rem+it;paid+=due;interest+=it;if(close>=b-.0001&&b>minFloor)return{possible:false,months:m,totalPaid:paid,totalInterest:interest,balance:close};b=close}return{possible:b<=.01,months:m,totalPaid:paid,totalInterest:interest,balance:b}}
+ function simpleInterest(P,annual,years){P=+P;annual=+annual;years=+years;if(!valid(P,annual,years)||P<0||annual<0||years<0)return null;const interest=P*annual*years/100;return{interest,total:P+interest}}
+ function compound(P,annual,years,n=4){P=+P;annual=+annual;years=+years;n=+n;if(!valid(P,annual,years,n)||P<0||annual<0||years<0||n<=0)return null;const total=P*(1+annual/(100*n))**(n*years);return{interest:total-P,total}}
+ function sip(payment,annual,months,timing='end'){payment=+payment;annual=+annual;months=+months;if(!valid(payment,annual,months)||payment<0||annual<0||months<=0)return null;const r=annual/1200;let fv;if(r===0)fv=payment*months;else fv=payment*((1+r)**months-1)/r;if(timing==='begin')fv*=1+r;const invested=payment*months;return{invested,gain:fv-invested,total:fv}}
+ function recurring(payment,annual,months){return sip(payment,annual,months,'end')}
+ function lumpsum(P,annual,years){return compound(P,annual,years,1)}
+ function cagr(start,end,years){start=+start;end=+end;years=+years;if(!valid(start,end,years)||start<=0||end<0||years<=0)return null;return((end/start)**(1/years)-1)*100}
+ function inflation(cost,annual,years){cost=+cost;annual=+annual;years=+years;if(!valid(cost,annual,years)||cost<0||annual<0||years<0)return null;const future=cost*(1+annual/100)**years;return{future,increase:future-cost}}
+ function percentage(part,whole){part=+part;whole=+whole;if(!valid(part,whole)||whole===0)return null;return part/whole*100}
+ function pctChange(oldV,newV){oldV=+oldV;newV=+newV;if(!valid(oldV,newV)||oldV===0)return null;return(newV-oldV)/Math.abs(oldV)*100}
+ function discount(price,pct){price=+price;pct=+pct;if(!valid(price,pct)||price<0||pct<0)return null;const saving=price*pct/100;return{saving,final:price-saving}}
+ function fuel(distance,mileage,price){distance=+distance;mileage=+mileage;price=+price;if(!valid(distance,mileage,price)||distance<0||mileage<=0||price<0)return null;const litres=distance/mileage;return{litres,cost:litres*price}}
+ const api={emi,amortize,prepayment,creditMinimum,simpleInterest,compound,sip,recurring,lumpsum,cagr,inflation,percentage,pctChange,discount,fuel};
+ if(typeof module!=='undefined'&&module.exports)module.exports=api;global.Calculators=api;
+})(typeof window!=='undefined'?window:globalThis);

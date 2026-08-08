@@ -1,0 +1,9 @@
+{
+  "name": "CalcBharat",
+  "short_name": "CalcBharat",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f9fc",
+  "theme_color": "#155eef",
+  "icons": []
+}

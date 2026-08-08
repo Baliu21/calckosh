@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://Baliu21.github.io/calcbharat/sitemap.xml

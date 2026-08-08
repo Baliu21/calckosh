@@ -1,0 +1,2 @@
+
+(function(){"use strict";const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(n)||0);const number=(n,d=2)=>new Intl.NumberFormat('en-IN',{maximumFractionDigits:d}).format(Number(n)||0);const months=m=>{m=Math.max(0,Math.round(+m||0));const y=Math.floor(m/12),mo=m%12;return[y?`${y} yr${y===1?'':'s'}`:'',mo?`${mo} mo${mo===1?'':'s'}`:''].filter(Boolean).join(' ')||'0 months'};window.UI={money,number,months};document.querySelectorAll('[data-year]').forEach(x=>x.textContent=new Date().getFullYear());})();
