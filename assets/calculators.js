@@ -20,6 +20,72 @@ function percentage(part,whole){part=+part;whole=+whole;if(!valid(part,whole)||w
 function pctChange(oldV,newV){oldV=+oldV;newV=+newV;if(!valid(oldV,newV)||oldV===0)return null;return(newV-oldV)/Math.abs(oldV)*100}
 function discount(price,pct){price=+price;pct=+pct;if(!valid(price,pct)||price<0||pct<0)return null;const saving=price*pct/100;return{saving,final:price-saving}}
 function fuel(distance,mileage,price){distance=+distance;mileage=+mileage;price=+price;if(!valid(distance,mileage,price)||distance<0||mileage<=0||price<0)return null;const litres=distance/mileage;return{litres,cost:litres*price}}
-const api={emi,loanSchedule,amortize,prepayment,prepaymentPlan,creditMinimum,creditMinimumPlan,creditFixedPlan,simpleInterest,compound,sip,recurring,lumpsum,cagr,inflation,percentage,pctChange,discount,fuel};
+/* CALCKOSH_INVESTMENT_V6 */
+function fdPlan(P,annual,years,n=4){
+  P=+P;annual=+annual;years=+years;n=+n;
+  if(!valid(P,annual,years,n)||P<0||annual<0||years<0||n<=0)return null;
+  const base=compound(P,annual,years,n);
+  if(!base)return null;
+  const factor=1+annual/(100*n),schedule=[{year:0,balance:P,interest:0}];
+  const whole=Math.floor(years);
+  for(let y=1;y<=whole;y++){
+    const b=P*factor**(n*y);
+    schedule.push({year:y,balance:b,interest:b-P});
+  }
+  if(Math.abs(years-whole)>1e-9){
+    schedule.push({year:years,balance:base.total,interest:base.interest});
+  }else if(schedule.length){
+    schedule[schedule.length-1]={year:years,balance:base.total,interest:base.interest};
+  }
+  const effectiveAnnual=((1+annual/(100*n))**n-1)*100;
+  return{principal:P,interest:base.interest,total:base.total,effectiveAnnual,schedule};
+}
+function contributionPlan(payment,annual,months,timing='end'){
+  payment=+payment;annual=+annual;months=Math.round(+months);
+  if(!valid(payment,annual,months)||payment<0||annual<0||months<=0)return null;
+  const r=annual/1200,schedule=[];
+  let balance=0,invested=0;
+  for(let m=1;m<=months;m++){
+    if(timing==='begin') balance=(balance+payment)*(1+r);
+    else balance=balance*(1+r)+payment;
+    invested+=payment;
+    schedule.push({month:m,invested,balance,gain:balance-invested});
+  }
+  const effectiveAnnual=((1+r)**12-1)*100;
+  return{payment,invested,gain:balance-invested,total:balance,months,effectiveAnnual,schedule};
+}
+function lumpsumPlan(P,annual,years){
+  P=+P;annual=+annual;years=+years;
+  if(!valid(P,annual,years)||P<0||annual<0||years<0)return null;
+  const base=lumpsum(P,annual,years);
+  if(!base)return null;
+  const factor=1+annual/100,schedule=[{year:0,balance:P,gain:0}];
+  const whole=Math.floor(years);
+  for(let y=1;y<=whole;y++){
+    const b=P*factor**y;
+    schedule.push({year:y,balance:b,gain:b-P});
+  }
+  if(Math.abs(years-whole)>1e-9){
+    schedule.push({year:years,balance:base.total,gain:base.interest});
+  }else if(schedule.length){
+    schedule[schedule.length-1]={year:years,balance:base.total,gain:base.interest};
+  }
+  return{principal:P,gain:base.interest,total:base.total,multiple:P?base.total/P:0,schedule};
+}
+function cagrPlan(start,end,years){
+  start=+start;end=+end;years=+years;
+  const rate=cagr(start,end,years);
+  if(rate===null)return null;
+  const factor=1+rate/100,schedule=[{year:0,value:start}];
+  const whole=Math.floor(years);
+  for(let y=1;y<=whole;y++)schedule.push({year:y,value:start*factor**y});
+  if(Math.abs(years-whole)>1e-9) schedule.push({year:years,value:end});
+  else if(schedule.length) schedule[schedule.length-1]={year:years,value:end};
+  const totalReturn=(end-start)/start*100;
+  const gain=end-start,multiple=end/start;
+  const doublingYears=rate>0?Math.log(2)/Math.log(1+rate/100):null;
+  return{rate,totalReturn,gain,multiple,doublingYears,schedule};
+}
+const api={fdPlan,contributionPlan,lumpsumPlan,cagrPlan,emi,loanSchedule,amortize,prepayment,prepaymentPlan,creditMinimum,creditMinimumPlan,creditFixedPlan,simpleInterest,compound,sip,recurring,lumpsum,cagr,inflation,percentage,pctChange,discount,fuel};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;global.Calculators=api;
 })(typeof window!=='undefined'?window:globalThis);
